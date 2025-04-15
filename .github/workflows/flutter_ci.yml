@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  android-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,3 +46,47 @@ jobs:
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+    ios-build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.2'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Build iOS Debug
+      - name: Build iOS Debug
+        run: flutter build ios --debug --no-codesign
+
+      - name: Archive iOS Debug App
+        run: |
+          mkdir -p build/ios/iphoneos/debug
+          cp -r build/ios/iphoneos/*.app build/ios/iphoneos/debug/AppDebug.app
+
+      - name: Upload iOS Debug Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app-debug
+          path: build/ios/iphoneos/debug/AppDebug.app
+
+      # # Build iOS Release
+      # - name: Build iOS Release
+      #   run: flutter build ios --release --no-codesign
+
+      # - name: Archive iOS Release App
+      #   run: |
+      #     mkdir -p build/ios/iphoneos/release
+      #     cp -r build/ios/iphoneos/*.app build/ios/iphoneos/release/AppRelease.app
+
+      # - name: Upload iOS Release Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ios-app-release
+      #     path: build/ios/iphoneos/release/AppRelease.app
+
